@@ -1,0 +1,312 @@
+{
+  "info": {
+    "_postman_id": "0bb639a5-8636-4d6e-bcda-af1c5ffb34cd",
+    "name": "Restful Booker API Test",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "43714568",
+    "_collection_link": "https://go.postman.co/collection/43714568-0bb639a5-8636-4d6e-bcda-af1c5ffb34cd?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "1. Auth - Create Token",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// 1. Проверка кода ответа\npm.test(\"Status code is 200\", function () {\n    pm.response.to.have.status(200);\n});\n\n// 2. Проверка, что ответ в формате JSON\npm.test(\"Response is JSON\", function () {\n    pm.response.to.be.json;\n});\n\n// 3. Проверка наличия поля token и его типа\npm.test(\"Response has valid token\", function () {\n    const jsonData = pm.response.json();\n    pm.expect(jsonData).to.have.property(\"token\");\n    pm.expect(jsonData.token).to.be.a(\"string\");\n    \n    // 4. АВТОМАТИЧЕСКИ сохраняем полученный токен в переменную коллекции!\n    pm.collectionVariables.set(\"token\", jsonData.token);\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"username\": \"admin\",\n    \"password\": \"password123\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/auth",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "auth"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "2. Booking - Get All IDs",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "   // 1. Проверка статуса\n   pm.test(\"Status code is 200\", function () {\n       pm.response.to.have.status(200);\n   });\n\n   // 2. Проверка, что ответ — это массив\n   pm.test(\"Response is an array\", function () {\n       const jsonData = pm.response.json();\n       pm.expect(jsonData).to.be.an('array');\n   });\n\n   // 3. Проверка, что массив не пустой (есть хотя бы одно бронирование)\n   pm.test(\"Array is not empty\", function () {\n       const jsonData = pm.response.json();\n       pm.expect(jsonData.length).to.be.greaterThan(0);\n   });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/booking",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "booking"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "3. Booking - Create Booking",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "   // 1. Проверка статуса\n   pm.test(\"Status code is 200\", function () {\n       pm.response.to.have.status(200);\n   });\n\n   // 2. Проверка наличия bookingid и его СОХРАНЕНИЕ в переменную\n   pm.test(\"Response has bookingid and saves it\", function () {\n       const jsonData = pm.response.json();\n       pm.expect(jsonData).to.have.property(\"bookingid\");\n       pm.expect(jsonData.bookingid).to.be.a(\"number\");\n       \n       // Сохраняем ID для использования в PUT, PATCH, DELETE\n       pm.collectionVariables.set(\"bookingId\", jsonData.bookingid);\n   });\n\n   // 3. Проверка структуры ответа\n   pm.test(\"Response has correct booking data\", function () {\n       const jsonData = pm.response.json();\n       pm.expect(jsonData.booking.firstname).to.eql(\"Ivan\");\n       pm.expect(jsonData.booking.lastname).to.eql(\"Ivanov\");\n       pm.expect(jsonData.booking.totalprice).to.eql(250);\n   });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "   {\n       \"firstname\": \"Ivan\",\n       \"lastname\": \"Ivanov\",\n       \"totalprice\": 250,\n       \"depositpaid\": true,\n       \"bookingdates\": {\n           \"checkin\": \"2024-12-01\",\n           \"checkout\": \"2024-12-10\"\n       },\n       \"additionalneeds\": \"Late check-in\"\n   }",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/booking",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "booking"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "4. Booking - Get Single Booking",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// 1. Проверка статуса\npm.test(\"Status code is 200\", function () {\n    pm.response.to.have.status(200);\n});\n\n// 2. Проверка структуры ответа — все обязательные поля присутствуют\npm.test(\"Response has all required fields\", function () {\n    const jsonData = pm.response.json();\n    pm.expect(jsonData).to.have.property(\"firstname\");\n    pm.expect(jsonData).to.have.property(\"lastname\");\n    pm.expect(jsonData).to.have.property(\"totalprice\");\n    pm.expect(jsonData).to.have.property(\"depositpaid\");\n    pm.expect(jsonData).to.have.property(\"bookingdates\");\n    pm.expect(jsonData.bookingdates).to.have.property(\"checkin\");\n    pm.expect(jsonData.bookingdates).to.have.property(\"checkout\");\n    pm.expect(jsonData).to.have.property(\"additionalneeds\");\n});\n\n// 3. Проверка, что данные совпадают с тем, что мы создали\npm.test(\"Booking data matches created data\", function () {\n    const jsonData = pm.response.json();\n    pm.expect(jsonData.firstname).to.eql(\"Ivan\");\n    pm.expect(jsonData.lastname).to.eql(\"Ivanov\");\n    pm.expect(jsonData.totalprice).to.eql(250);\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/booking/{{bookingId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "booking",
+            "{{bookingId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "5. Booking - Update Booking (PUT)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// 1. Проверка статуса\npm.test(\"Status code is 200\", function () {\n    pm.response.to.have.status(200);\n});\n\n// 2. Проверка, что данные обновились\npm.test(\"Booking data is updated\", function () {\n    const jsonData = pm.response.json();\n    pm.expect(jsonData.firstname).to.eql(\"Petr\");\n    pm.expect(jsonData.lastname).to.eql(\"Petrov\");\n    pm.expect(jsonData.totalprice).to.eql(500);\n    pm.expect(jsonData.depositpaid).to.eql(false);\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Cookie",
+            "value": "token={{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "   {\n       \"firstname\": \"Petr\",\n       \"lastname\": \"Petrov\",\n       \"totalprice\": 500,\n       \"depositpaid\": false,\n       \"bookingdates\": {\n           \"checkin\": \"2025-01-15\",\n           \"checkout\": \"2025-01-20\"\n       },\n       \"additionalneeds\": \"Extra bed\"\n   }",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/booking/{{bookingId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "booking",
+            "{{bookingId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "6. Booking - Partial Update (PATCH)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// 1. Проверка статуса\npm.test(\"Status code is 200\", function () {\n    pm.response.to.have.status(200);\n});\n\n// 2. Проверка, что имя обновилось, а остальные поля сохранились\npm.test(\"Only firstname is updated, other fields preserved\", function () {\n    const jsonData = pm.response.json();\n    pm.expect(jsonData.firstname).to.eql(\"Alexey\");\n    pm.expect(jsonData.lastname).to.eql(\"Petrov\"); // осталось от PUT\n    pm.expect(jsonData.totalprice).to.eql(500); // осталось от PUT\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Cookie",
+            "value": "token={{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "   {\n       \"firstname\": \"Alexey\"\n   }",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/booking/{{bookingId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "booking",
+            "{{bookingId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "7. Booking - Delete Booking",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// 1. Проверка статуса (согласно документации API - 201 Created)\npm.test(\"Status code is 201 (as per API documentation)\", function () {\n    pm.response.to.have.status(201);\n});\n\n // 2. Проверка, что тело ответа содержит \"Created\" (согласно фактическому поведению API)\npm.test(\"Response body contains 'Created'\", function () {\n       pm.expect(pm.response.text()).to.include(\"Created\");\n        });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Cookie",
+            "value": "token={{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/booking/{{bookingId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "booking",
+            "{{bookingId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "8. Ping - Health Check",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "   // 1. Проверка статуса (согласно документации API - 201 Created)\n   pm.test(\"Status code is 201 (as per API documentation)\", function () {\n       pm.response.to.have.status(201);\n   });\n\n   // 2. Проверка, что тело ответа содержит \"Created\"\n   pm.test(\"Response body contains 'Created'\", function () {\n       pm.expect(pm.response.text()).to.include(\"Created\");\n   });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/ping",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "ping"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": ""
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "bookingId",
+      "value": ""
+    }
+  ]
+}
